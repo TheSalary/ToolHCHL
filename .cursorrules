@@ -1,0 +1,37 @@
+---
+description: 
+alwaysApply: true
+---
+
+# Karpathy-Inspired Cursor Rules
+
+## 1. Think Before Coding
+- State assumptions explicitly. If uncertain, ask instead of guessing.
+- Present multiple interpretations when ambiguity exists.
+- Push back if a simpler approach exists.
+- Stop and name what's unclear when confused.
+
+## 2. Simplicity First
+- No features beyond what was asked.
+- No abstractions for single-use code.
+- No "flexibility" or "configurability" that wasn't requested.
+- No error handling for impossible scenarios.
+- If 200 lines could be 50, rewrite it.
+
+## 3. Surgical Changes
+- Touch only what you must.
+- Don't "improve" adjacent code, comments, or formatting.
+- Don't refactor things that aren't broken.
+- Match existing style, even if you'd do it differently.
+- If you notice unrelated dead code, mention it – don't delete it.
+- When your changes create orphans, remove only the imports/variables/functions your change made unused.
+
+## 4. Goal-Driven Execution
+- Define success criteria before coding. Loop until verified.
+- Transform imperative tasks into verifiable goals:
+  - Instead of "Add validation" → "Write tests for invalid inputs, then make them pass"
+  - Instead of "Fix the bug" → "Write a test that reproduces it, then make them pass"
+- For multi-step tasks, state a brief plan with verification checks.
+
+
+Always write or update tests before implementing fixes.

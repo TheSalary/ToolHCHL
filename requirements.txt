@@ -1,0 +1,17 @@
+# --- 大语言模型底座 ---
+transformers>=4.40.0       # 完美支持 Llama-3 结构
+accelerate>=0.29.0         # 必须安装，用于处理 device_map="auto" 和显存分配
+huggingface_hub[cli]       # 模型下载工具
+modelscope                 # 国内魔搭源（备用下载）
+
+# --- 向量化与编码 ---
+sentence-transformers>=2.6.0 # 用于 Query 和工具描述的 384 维实时向量化
+
+# --- 聚类与几何空间底座 ---
+scikit-learn>=1.3.0
+hdbscan>=0.8.33            # 用于发现 L2 意图盒子 (非常重要)
+numpy<2.0.0                # 【安全锁】强制低于2.0，防止 HDBSCAN 底层 C 语言编译报错
+scipy
+
+# --- 辅助工具 ---
+tqdm                       # 训练和数据加载进度条
