@@ -120,8 +120,6 @@ pip install torch --index-url https://download.pytorch.org/whl/cu121
 pip install -r requirements.txt
 
 # 4. 下载 Llama-3 8B 模型（放置到配置路径）
-# 默认路径: /data/wyx/llama3-8b
-# 或修改 config.py 中的 LLAMA_PATH
 ```
 
 ### 目录初始化
@@ -141,7 +139,7 @@ python models/build_real_box_space.py
 
 ```python
 # config.py 第 23 行
-LLAMA_PATH = "/data/wyx/llama3-8b"   # 修改为你的 Llama-3 本地路径
+LLAMA_PATH = "YOUR_PATH"   # 修改为你的 Llama-3 本地路径
 ```
 
 ### 任务配置（`TASK_CONFIGS`）
@@ -174,7 +172,7 @@ from config import (
 
 ## 数据准备
 
-> Base 数据（ToolBench）需要提前准备好放到 `data/train/raw/`。
+> Base 数据（ToolBench）需要提前准备好放到 `data/bse/raw/`。
 > Task1/2/3 数据由 `scripts/prepare_task_data.py` 自动处理。
 
 ### 基础数据目录结构
@@ -408,7 +406,8 @@ python run_ablation.py --task task1 --mode eval --ablation ablation_compare
 task2 → 继承 task1 checkpoint
 task3 → 继承 task2 checkpoint
 
-配置已在 `config.py` 的 `TASK_CONFIGS` 中自动关联，无需手动指定 `--old-checkpoint`。
+需要再 `config.py` 的每一个任务的 `TASK_CONFIGS` 中手动设定
+
 
 ---
 

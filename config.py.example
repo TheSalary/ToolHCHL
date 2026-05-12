@@ -1,0 +1,299 @@
+"""
+config.py.example
+=================
+配置模板（GitHub 通用版本）。复制为 config.py 后根据本地环境修改。
+
+使用方式：
+    cp config.py.example config.py
+    # 修改 LLAMA_PATH 和 old_checkpoint 为本地实际路径
+"""
+
+import os
+import re
+import json
+
+# ============================================================================
+# 1. 路径配置
+# ============================================================================
+# 模型路径：改为本地实际路径，或设置环境变量 LLAMA_PATH
+LLAMA_PATH = os.environ.get("LLAMA_PATH", "/path/to/llama3-8b")
+
+# ============================================================================
+# 2. 任务配置（base / task1 / task2 / task3）
+# ============================================================================
+TASK_CONFIGS = {
+    "base": {
+        "name": "Base",
+        "prev_task": None,
+
+        "cluster_dir": "./data/train/clusters",
+        "l2_centers":  "./data/train/clusters/l2_centers.pt",
+        "l2_widths":   "./data/train/clusters/l2_widths.pt",
+        "l1_centers":  "./data/train/clusters/l1_centers.pt",
+        "l1_widths":   "./data/train/clusters/l1_widths.pt",
+        "m_global":    "./data/train/clusters/m_global.pt",
+        "tool_to_l2":  "./data/train/clusters/tool_to_l2.pt",
+        "l2_to_l1":    "./data/train/clusters/l2_to_l1.pt",
+
+        "train_json":  "./data/train/raw/retrieval_train.json",
+        "eval_json":   "./data/train/raw/retrieval_eval.json",
+        "cache_dir":   "./data/train/cache",
+
+        "old_checkpoint":   None,
+        "old_num_tools":   11112,
+        "old_num_boxes":   713,
+        "epochs":          5,
+        "batch_size":      16,
+        "lr":              1e-4,
+        "ckpt_dir":        "./checkpoints/base",
+        "eval_limit":      5000,
+    },
+
+    "task1": {
+        "name": "Task1",
+        "prev_task": "base",
+
+        "cluster_dir": "./data/task1/clusters",
+        "l2_centers":  "./data/task1/clusters/l2_centers.pt",
+        "l2_widths":   "./data/task1/clusters/l2_widths.pt",
+        "l1_centers":  "./data/train/clusters/l1_centers.pt",
+        "l1_widths":   "./data/train/clusters/l1_widths.pt",
+        "m_global":    "./data/task1/clusters/m_global.pt",
+        "tool_to_l2":  "./data/task1/clusters/tool_to_l2.pt",
+        "l2_to_l1":    "./data/task1/clusters/l2_to_l1.pt",
+
+        "train_json":  "./data/task1/raw/retrieval_train.json",
+        "eval_json":   "./data/task1/raw/retrieval_eval.json",
+        "cache_dir":   "./data/task1/cache",
+
+        "new_tools_json":       "./data/task1/clusters/task1_tools_with_id.json",
+        "prev_task_tools_json": None,
+        "prev_task_train_json": None,
+
+        # TODO: 改为本地实际 checkpoint 路径
+        "old_checkpoint": None,
+        "old_num_tools":  11752,
+        "old_num_boxes":  607,
+
+        "epochs":     5,
+        "batch_size": 16,
+        "lr":         1e-3,
+        "ckpt_dir":   "./checkpoints/task1",
+        "eval_limit": 5000,
+    },
+
+    "task2": {
+        "name": "Task2",
+        "prev_task": "task1",
+
+        "cluster_dir": "./data/task2/clusters",
+        "l2_centers":  "./data/task2/clusters/l2_centers.pt",
+        "l2_widths":   "./data/task2/clusters/l2_widths.pt",
+        "l1_centers":  "./data/task1/clusters/l1_centers.pt",
+        "l1_widths":   "./data/task1/clusters/l1_widths.pt",
+        "m_global":    "./data/task2/clusters/m_global.pt",
+        "tool_to_l2":  "./data/task2/clusters/tool_to_l2.pt",
+        "l2_to_l1":    "./data/task2/clusters/l2_to_l1.pt",
+
+        "train_json":  "./data/task2/raw/retrieval_train.json",
+        "eval_json":   "./data/task2/raw/retrieval_eval.json",
+        "cache_dir":   "./data/task2/cache",
+
+        "new_tools_json":       "./data/task2/clusters/task2_tools_with_id.json",
+        "prev_task_tools_json": "./data/task1/clusters/task1_tools_with_id.json",
+        "prev_task_train_json": "./data/task1/raw/retrieval_train.json",
+
+        # TODO: 改为本地实际 checkpoint 路径
+        "old_checkpoint": None,
+        "old_num_tools":  12392,
+        "old_num_boxes":  626,
+
+        "epochs":     5,
+        "batch_size": 16,
+        "lr":         1e-3,
+        "ckpt_dir":   "./checkpoints/task2",
+        "eval_limit": 5000,
+    },
+
+    "task3": {
+        "name": "Task3",
+        "prev_task": "task2",
+
+        "cluster_dir": "./data/task3/clusters",
+        "l2_centers":  "./data/task3/clusters/l2_centers.pt",
+        "l2_widths":   "./data/task3/clusters/l2_widths.pt",
+        "l1_centers":  "./data/task2/clusters/l1_centers.pt",
+        "l1_widths":   "./data/task2/clusters/l1_widths.pt",
+        "m_global":    "./data/task3/clusters/m_global.pt",
+        "tool_to_l2":  "./data/task3/clusters/tool_to_l2.pt",
+        "l2_to_l1":    "./data/task3/clusters/l2_to_l1.pt",
+
+        "train_json":  "./data/task3/raw/retrieval_train.json",
+        "eval_json":   "./data/task3/raw/retrieval_eval.json",
+        "cache_dir":   "./data/task3/cache",
+
+        "new_tools_json":       "./data/task3/clusters/task3_tools_with_id.json",
+        "prev_task_tools_json": "./data/task2/clusters/task2_tools_with_id.json",
+        "prev_task_train_json": "./data/task2/raw/retrieval_train.json",
+
+        # TODO: 改为本地实际 checkpoint 路径
+        "old_checkpoint": None,
+        "old_num_tools":  13035,
+        "old_num_boxes":  650,
+
+        "epochs":     5,
+        "batch_size": 16,
+        "lr":         1e-3,
+        "ckpt_dir":   "./checkpoints/task3",
+        "eval_limit": 5000,
+    },
+}
+
+# ============================================================================
+# 3. 消融实验配置
+# ============================================================================
+ABLATION_CONFIGS = {
+    "semi_freeze_off": {
+        "train_requires": True,
+        "router_cls":    "DualStreamRouter",
+        "desc":          "D2 关闭物理半冻结（全参数微调）",
+    },
+    "weight_inherit_off": {
+        "train_requires": True,
+        "router_cls":    "DualStreamRouter",
+        "desc":          "D3 关闭权重继承（随机初始化）",
+    },
+    "replay_off": {
+        "train_requires": True,
+        "router_cls":    "DualStreamRouter",
+        "desc":          "D4 关闭经验回放",
+    },
+    "geo_loss_off": {
+        "train_requires": True,
+        "router_cls":    "DualStreamRouter",
+        "desc":          "E1 关闭几何包含损失 L_geo",
+    },
+    "w/o_hierarchy": {
+        "train_requires": True,
+        "router_cls":    "FlatDualStreamRouter",
+        "desc":          "E2 去掉 L1 层，仅用 L2 软距离盒子",
+    },
+    "flat_space": {
+        "train_requires": True,
+        "router_cls":    "FlatDualStreamRouter",
+        "desc":          "E3 使用单层扁平空间（无 L1/L2 层级）",
+    },
+    "linear_router": {
+        "train_requires": True,
+        "router_cls":    "SimpleLinearRouter",
+        "desc":          "E4 使用 SimpleLinearRouter（无 box 机制，纯线性投影）",
+    },
+    "router_semantic": {
+        "train_requires": False,
+        "router_cls":    "DualStreamRouter",
+        "desc":          "R1 仅语义流，去除依赖流和门控",
+    },
+    "router_dependency": {
+        "train_requires": False,
+        "router_cls":    "DualStreamRouter",
+        "desc":          "R2 仅依赖流，去除语义流",
+    },
+    "router_no_gate": {
+        "train_requires": False,
+        "router_cls":    "DualStreamRouter",
+        "desc":          "R3 去除门控，固定 alpha=0.5 融合",
+    },
+    "ablation_compare": {
+        "train_requires": False,
+        "router_cls":    "DualStreamRouter",
+        "desc":          "综合对比：推理时消融对比所有 R 系列实验",
+    },
+}
+
+INFERENCE_ABLATIONS = {
+    name for name, cfg in ABLATION_CONFIGS.items()
+    if not cfg["train_requires"]
+}
+
+# ============================================================================
+# 5. 辅助函数
+# ============================================================================
+def get_task_cfg(task_name: str) -> dict:
+    key = task_name.lower()
+    if key not in TASK_CONFIGS:
+        raise KeyError(f"未知任务: {task_name!r}，可选: {list(TASK_CONFIGS.keys())}")
+    return TASK_CONFIGS[key]
+
+
+def get_prev_task_cfg(task_name: str) -> dict | None:
+    cfg = get_task_cfg(task_name)
+    prev = cfg.get("prev_task")
+    return get_task_cfg(prev) if prev else None
+
+
+def get_ablation_cfg(ablation_name: str) -> dict | None:
+    return ABLATION_CONFIGS.get(ablation_name)
+
+
+def get_all_task_names() -> list[str]:
+    return list(TASK_CONFIGS.keys())
+
+
+def get_all_ablation_names() -> list[str]:
+    return list(ABLATION_CONFIGS.keys())
+
+
+def get_checkpoint_dir(task_name: str, ablation: str | None = None) -> str:
+    key = task_name.lower()
+    cfg = get_task_cfg(key)
+    base = cfg["ckpt_dir"]
+    if ablation is None or ablation == "ablation_compare":
+        return base
+    ab_subdirs = {
+        "semi_freeze_off":    "ablation/semi_freeze_off",
+        "weight_inherit_off": "ablation/weight_inherit_off",
+        "replay_off":         "ablation/replay_off",
+        "geo_loss_off":       "ablation/geo_loss_off",
+        "w/o_hierarchy":      "ablation/wo_hierarchy",
+        "flat_space":         "ablation/flat_space",
+        "linear_router":      "ablation/linear_router",
+    }
+    sub = ab_subdirs.get(ablation, f"ablation/{ablation}")
+    return f"{base}/{sub}"
+
+# ============================================================================
+# 6. 工具函数
+# ============================================================================
+def normalize(name: str) -> str:
+    return re.sub(r'[^a-zA-Z0-9]', '', str(name)).lower()
+
+
+def load_data_mappings(task_cfg: dict) -> dict[str, int]:
+    name_to_id: dict[str, int] = {}
+
+    base_tools_path = "./data/train/raw/train_tools_with_id.json"
+    if os.path.exists(base_tools_path):
+        with open(base_tools_path, "r", encoding="utf-8") as f:
+            base_tools = json.load(f)
+        for t in base_tools:
+            api_norm = normalize(t.get("api_name", ""))
+            tool_norm = normalize(t.get("tool_name", ""))
+            name_to_id[f"{api_norm}for{tool_norm}"] = t.get("tool_id")
+
+    task_name = task_cfg.get("name", "").lower()
+    for prefix in ["task1", "task2", "task3"]:
+        if prefix in task_name or task_cfg.get("cluster_dir", "").startswith(f"./data/{prefix}"):
+            for n in ["task1", "task2", "task3"]:
+                tools_json = os.path.join(f"./data/{n}/clusters", f"{n}_tools_with_id.json")
+                if os.path.exists(tools_json):
+                    with open(tools_json, "r", encoding="utf-8") as f:
+                        new_tools = json.load(f)
+                    for t_id_str, text in new_tools.items():
+                        if isinstance(text, str):
+                            a_match = re.search(r'API:\s*(.*?)\.(?:\s*API Description:|$)', text)
+                            t_match = re.search(r'Tool:\s*(.*?)\.(?:\s*Description:|\s*API:)', text)
+                            if a_match and t_match:
+                                a_name = a_match.group(1).strip()
+                                t_name = t_match.group(1).strip()
+                                name_to_id[normalize(f"{a_name}for{t_name}")] = int(t_id_str)
+    return name_to_id

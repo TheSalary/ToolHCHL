@@ -18,3 +18,4 @@ tests/
 *.md
 !README.md
 .env
+config.py
