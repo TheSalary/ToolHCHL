@@ -8,7 +8,7 @@ IH-PromptDSI 通用数据准备脚本。
   Stage 0  检查数据：统计 raw 文件行数、唯一工具数、题库样本数。
   Stage 1  从 memorization_train.json 提取工具真名，派发全局 ID，
             生成 clusters/{task}_tools_with_id.json。
-  Stage 2  用 tools.txt 归一化检索题库（retrieval_train.json），
+  Stage 2  用 tool.txt 归一化检索题库（retrieval_train.json），
             将工具名替换为全局 ID，生成 clusters/{task}_retrieval_clean.json。
   Stage 3  特征提取（SentenceTransformer） + 增量 KMeans 聚类
             + 缝合新 L2 盒子 + 扩展 m_global，输出完整 clusters/ 目录。
@@ -120,14 +120,14 @@ def stage0(cfg, prev_cfg):
     else:
         print(f"  retrieval_eval.json     : 不存在！")
 
-    # tools.txt
-    tools_txt_path = os.path.join(raw_dir, "tools.txt")
+    # tool.txt
+    tools_txt_path = os.path.join(raw_dir, "tool.txt")
     if os.path.exists(tools_txt_path):
         with open(tools_txt_path, encoding="utf-8") as f:
             lines = [l.strip() for l in f if l.strip()]
-        print(f"  tools.txt              : {len(lines)} 个工具")
+        print(f"  tool.txt              : {len(lines)} 个工具")
     else:
-        print(f"  tools.txt              : 不存在！")
+        print(f"  tool.txt              : 不存在！")
 
     # 检查继承链
     if prev_cfg:
@@ -241,7 +241,7 @@ def stage1(cfg, prev_cfg):
 
 
 # ---------------------------------------------------------------------------
-# Stage 2：用 tools.txt 归一化题库，生成 *_retrieval_clean.json
+# Stage 2：用 tool.txt 归一化题库，生成 *_retrieval_clean.json
 # ---------------------------------------------------------------------------
 def stage2(cfg, prev_cfg):
     task = cfg["task_name"]
@@ -267,9 +267,14 @@ def stage2(cfg, prev_cfg):
             tools_with_id = json.load(f)
 
     # 从 tools_with_id 反建 name -> id 映射（用于 stage 2 的正则提取）
-    # 这个映射对应的是 tools.txt 中的行，格式为 "<<Tool&&Api>>"
+    # 这个映射对应的是 tool.txt 中的行，格式为 "<<Tool&&Api>>"
     name_to_id = {}
-    for tid_str, text in tools_with_id.items():
+    for tid_str, info in tools_with_id.items():
+        if not isinstance(info, dict) or "text" not in info:
+            continue
+        text = info["text"]
+        if not isinstance(text, str):
+            continue
         m_t = re.search(r'Tool:\s*(.*?)\.', text)
         m_a = re.search(r'API:\s*(.*?)\.', text)
         if m_t and m_a:
@@ -278,10 +283,10 @@ def stage2(cfg, prev_cfg):
             norm = normalize(f"{a_name}for{t_name}")
             name_to_id[norm] = int(tid_str)
 
-    # 加载 tools.txt 归一化，建立 <<Tool&&Api>> -> id
-    tools_txt_path = os.path.join(raw_dir, "tools.txt")
+    # 加载 tool.txt 归一化，建立 <<Tool&&Api>> -> id
+    tools_txt_path = os.path.join(raw_dir, "tool.txt")
     if not os.path.exists(tools_txt_path):
-        raise FileNotFoundError(f"找不到 tools.txt: {tools_txt_path}")
+        raise FileNotFoundError(f"找不到 tool.txt: {tools_txt_path}")
 
     with open(tools_txt_path, encoding="utf-8") as f:
         txt_lines = [l.strip() for l in f if l.strip()]
@@ -293,7 +298,7 @@ def stage2(cfg, prev_cfg):
             norm = normalize(f"{a}for{t}")
             if norm in name_to_id:
                 continue  # 已在 tools_with_id 中
-            # 如果 tools.txt 中有但 memo 中没有，用临时占位（跳过）
+            # 如果 tool.txt 中有但 memo 中没有，用临时占位（跳过）
 
     print(f"\n{'='*50}")
     print(f"[Stage 2] 归一化检索题库 — {task}")
